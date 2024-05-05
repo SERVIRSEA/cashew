@@ -1,5 +1,3 @@
-from PIL import Image
-import cv2
 import requests
 from osgeo import osr, gdal
 import ee
@@ -7,15 +5,11 @@ from google.api_core import exceptions, retry
 import numpy as np
 import io
 from numpy.lib.recfunctions import structured_to_unstructured
-from segment_anything import sam_model_registry,SamAutomaticMaskGenerator, SamPredictor
-import matplotlib.pyplot as plt
 import rasterio
 from rasterio.transform import from_origin
 from datetime import datetime
+from typing import Tuple
 import os
-
-import concurrent.futures
-from concurrent.futures import ProcessPoolExecutor
 
 
 ee.Initialize()
@@ -358,14 +352,16 @@ def process_feature(i):
 
 
 year = 2022
-#process_feature(1)
 
-
-# Execute process_feature in parallel
-with ProcessPoolExecutor(max_workers=4) as executor:
-    futures = [executor.submit(process_feature, i) for i in range(0, 7300, 1)]
-
-# Wait for all processes to complete
-concurrent.futures.wait(futures)
-print("All tasks completed.")
+if __name__ == "__main__":
+    # Place all multiprocessing-related code here
+    
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        futures = [executor.submit(process_feature, i) for i in range(0, 510, 1)]
+        for future in concurrent.futures.as_completed(futures):
+            try:
+                result = future.result()
+                # Handle the result
+            except Exception as exc:
+                print(f'Generated an exception: {exc}')
 
